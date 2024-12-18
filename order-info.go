@@ -455,3 +455,24 @@ type OrderQrlink struct {
 	CanSentToMFC        bool `json:"canSentToMFC"`        // Флаг отправки в МФЦ
 	CanPrintMFC         bool `json:"canPrintMFC"`         // [Не документировано]
 }
+
+// OrdersStatus - статусы заявлений по переданному списку заявлений
+type OrdersStatus struct {
+	Count      int            `json:"count"`      // Количество записей, содержащихся в массиве Content
+	TotalCount int            `json:"totalCount"` // Количество найденных записей, подходящих под условие
+	Content    []OrderContent `json:"content"`    // Массив записей, каждая из которых представлена структурой содержащей информацию о заявлении и статусе
+}
+
+type OrderContent struct {
+	OrderId           int    `json:"orderId"`           // Номер заявления
+	OrderSearchStatus string `json:"orderSearchStatus"` // Признак нахождения статуса заявления. Может принимать значение FOUND/ NOT_FOUND
+	Status            any    `json:"status"`            // Информация о текущем статусе заявления. Может быть не представлена
+}
+
+type OrderContentStatus struct {
+	// Код статуса (код статуса из ЛК ЕПГУ, соответствует статусной модели услуг).
+	// Данный статус соответствует параметру statusId последнего объекта массива statuses результата запроса деталей заявления (POST /api/gusmev/order/{orderId})
+	StatusId   int      `json:"statusId"`
+	StatusName string   `json:"statusName"` // Наименование статуса
+	Updated    DateTime `json:"updated"`    // Дата и время обновления статуса
+}

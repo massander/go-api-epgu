@@ -7,6 +7,9 @@ import (
 	"mime/multipart"
 	"net/http"
 	"regexp"
+	"strconv"
+	"strings"
+	"time"
 
 	"github.com/ofstudio/go-api-epgu/utils"
 )
@@ -423,4 +426,58 @@ func (c *Client) Dict(code string, filter, parent string, pageNum, pageSize int)
 	}
 
 	return dictResponse.Items, dictResponse.Total, nil
+}
+
+// GetOrdersStatus - Получение статусов заявлений по переданному списку заявлений
+//
+//	GET /api/gusmev/order/getOrdersStatus/?pageNum={n}&pageSize={m}&orderIds={array[integer]}
+//
+// Параметры:
+//   - pageNum - номер необходимой страницы. Начало нумерации с 0
+//   - pageSize - количество записей на странице
+//   - orderIds - номера заявлений ([integer])
+func (c *Client) GetOrdersStatus(token string, pageNum, pageSize int, orderIds []int) (*OrdersStatus, error) {
+	// Convert []int to []string
+	strOrderIds := make([]string, len(orderIds))
+	for i, num := range orderIds {
+		strOrderIds[i] = strconv.Itoa(num)
+	}
+
+	ordersStatus := &OrdersStatus{}
+	if err := c.requestJSON(
+		http.MethodGet,
+		fmt.Sprintf("/api/gusmev/order/getOrdersStatus/?pageNum=%d&pageSize=%d&orderIds=%s", pageNum, pageSize, strings.Join(strOrderIds, ", ")),
+		"application/json; charset=utf-8",
+		token,
+		nil,
+		ordersStatus,
+	); err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrGetOrdersStatus, err)
+	}
+
+	return ordersStatus, nil
+}
+
+// Получение статусов всех заявлений с даты обновления статуса
+//
+//	GET /api/gusmev/order/getUpdatedAfter?pageNum={n}&pageSize={m}&updatedAfter={timestamp}
+//
+// Параметры:
+//   - pageNum - номер необходимой страницы. Начало нумерации с 0
+//   - pageSize - количество записей на странице
+//   - updatedAfter – дата и время в формате [YYYY-MM-DD'T'HH:mm:ss.SSS], после которых были обновлены статусы
+func (c *Client) GetUpdatedAfter(token string, pageNum, pageSize int, updatedAfter time.Time) (*OrdersStatus, error) {
+	ordersStatus := &OrdersStatus{}
+	if err := c.requestJSON(
+		http.MethodGet,
+		fmt.Sprintf("/api/gusmev/order/getUpdatedAfter/?pageNum=%d&pageSize=%d&updatedAfter=%s", pageNum, pageSize, DateTime{updatedAfter}),
+		"",
+		token,
+		nil,
+		ordersStatus,
+	); err != nil {
+		return nil, fmt.Errorf("%w: %w", ErrGetUpdatedAfter, err)
+	}
+
+	return ordersStatus, nil
 }
