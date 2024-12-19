@@ -464,9 +464,9 @@ type OrdersStatus struct {
 }
 
 type OrderContent struct {
-	OrderId           int    `json:"orderId"`           // Номер заявления
-	OrderSearchStatus string `json:"orderSearchStatus"` // Признак нахождения статуса заявления. Может принимать значение FOUND/ NOT_FOUND
-	Status            any    `json:"status"`            // Информация о текущем статусе заявления. Может быть не представлена
+	OrderId           int                `json:"orderId"`           // Номер заявления
+	OrderSearchStatus string             `json:"orderSearchStatus"` // Признак нахождения статуса заявления. Может принимать значение FOUND/ NOT_FOUND
+	Status            OrderContentStatus `json:"status"`            // Информация о текущем статусе заявления. Может быть не представлена
 }
 
 type OrderContentStatus struct {
